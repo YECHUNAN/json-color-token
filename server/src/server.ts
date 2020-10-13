@@ -107,7 +107,7 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	if (!result) {
 		result = connection.workspace.getConfiguration({
 			scopeUri: resource,
-			section: 'languageServerExample'
+			section: 'jsonColorToken'
 		});
 		documentSettings.set(resource, result);
 	}
@@ -145,7 +145,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 				start: textDocument.positionAt(m.index),
 				end: textDocument.positionAt(m.index + m[0].length)
 			}, 
-			color: "#ff0000"
+			color: m[0]
 		});
 	}
 }
