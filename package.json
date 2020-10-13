@@ -1,0 +1,49 @@
+{
+	"name": "json-coor-token",
+	"description": "A language server that enables previewing color tokens in json documents",
+	"author": "Chunan Ye",
+	"license": "MIT",
+	"version": "1.0.0-beta.1",
+	"repository": {
+		"type": "git",
+		"url": "TODO"
+	},
+	"publisher": "Chunan Ye",
+	"categories": [],
+	"keywords": [
+		"multi-root ready"
+	],
+	"engines": {
+		"vscode": "^1.43.0"
+	},
+	"activationEvents": [
+		"onLanguage:plaintext"
+	],
+	"main": "./client/out/extension",
+	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "JSON Color Token",
+			"properties": {
+				"jsonColorToken.maxNumberOfColorTokens": {
+					"scope": "resource",
+					"type": "number",
+					"default": 100,
+					"description": "Controls the maximum number of color tokens to show preview color."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -b",
+		"watch": "tsc -b -w",
+		"postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+	},
+	"devDependencies": {
+		"@types/node": "^12.12.0",
+		"eslint": "^6.4.0",
+		"@typescript-eslint/parser": "^2.3.0",
+		"typescript": "^4.0.2"
+	}
+}
