@@ -13,7 +13,9 @@
 	InitializeResult,
 	ColorInformation,
 	Color,
-	DocumentColorParams
+	DocumentColorParams,
+	ColorPresentationParams,
+	ColorPresentation
 } from 'vscode-languageserver';
 
 import {
@@ -150,16 +152,26 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 	}
 }
 
-connection.onDocumentColor((params: DocumentColorParams): ColorInformation[] => {
-	let parseColor = function(color: string): Color {
-		const red = parseInt(color.slice(1, 3), 16)/ 255;
-		const green = parseInt(color.slice(3, 5), 16) / 255;
-		const blue = parseInt(color.slice(5, 7), 16) / 255;
-		return {
-			red, green, blue, alpha: 1.0
-		}
+function parseColor (color: string): Color {
+	const red = parseInt(color.slice(2, 4), 16)/ 255;
+	const green = parseInt(color.slice(4, 6), 16) / 255;
+	const blue = parseInt(color.slice(6, 8), 16) / 255;
+	return {
+		red, green, blue, alpha: 1.0
 	}
+}
 
+// TODO: add support for default to lower case/upper case
+// TODO: handle the case where a color value is written in short handed version 0
+function stringifyColor(color: Color): string {
+	let result = "#";
+	result += Math.floor(color.red * 255).toString(16).toLowerCase();
+	result += Math.floor(color.green * 255).toString(16).toLowerCase();
+	result += Math.floor(color.blue * 255).toString(16).toLowerCase();
+	return result;
+}
+
+connection.onDocumentColor((params: DocumentColorParams): ColorInformation[] => {
 	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
@@ -168,6 +180,10 @@ connection.onDocumentColor((params: DocumentColorParams): ColorInformation[] => 
 		};
 	});
 	return colorInformations;
+});
+
+connection.onColorPresentation((params: ColorPresentationParams): ColorPresentation[] => {
+	return [{ label: `"${stringifyColor(params.color)}"` }];
 });
 
 // Make the text document manager listen on the connection
