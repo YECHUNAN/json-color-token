@@ -1,6 +1,6 @@
 {
 	"name": "json-coor-token",
-	"description": "A language server that enables previewing color tokens in json documents",
+	"description": "A language server that enables previewing hex color tokens in json documents",
 	"author": "Chunan Ye",
 	"license": "MIT",
 	"version": "1.0.0-beta.1",
@@ -30,6 +30,18 @@
 					"type": "number",
 					"default": 100,
 					"description": "Controls the maximum number of color tokens to show preview color."
+				},
+				"jsonColorToken.colorTokenCasing": {
+					"type": "string",
+					"default": "Uppercase",
+					"enum": [
+						"Uppercase",
+						"Lowercase"
+					],
+					"enumDescriptions": [
+						"Color presentation selected in the in-editor color picker will insert color code as uppercase letters (e.g. #AABBCC).",
+						"Color presentation selected in the in-editor color picker will insert color code as lowercase letters (e.g. #aabbcc)."
+					]
 				}
 			}
 		}
@@ -44,6 +56,7 @@
 		"@types/node": "^12.12.0",
 		"eslint": "^6.4.0",
 		"@typescript-eslint/parser": "^2.3.0",
-		"typescript": "^4.0.2"
+		"typescript": "^4.0.2",
+		"vsce": "^1.80.0"
 	}
 }
