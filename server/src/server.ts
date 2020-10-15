@@ -74,26 +74,30 @@ connection.onInitialized(() => {
 });
 
 // The example settings
-interface ExampleSettings {
+interface JSONColorTokenSettings {
 	maxNumberOfColorTokens: number;
+	colorTokenCasing: "Uppercase" | "Lowercase";
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
-const defaultSettings: ExampleSettings = { maxNumberOfColorTokens: 1000 };
-let globalSettings: ExampleSettings = defaultSettings;
+const defaultSettings: JSONColorTokenSettings = { 
+	maxNumberOfColorTokens: 1000,
+	colorTokenCasing: "Uppercase"
+};
+let globalSettings: JSONColorTokenSettings = defaultSettings;
 
 // Cache the settings of all open documents
-let documentSettings: Map<string, Thenable<ExampleSettings>> = new Map();
+let documentSettings: Map<string, Thenable<JSONColorTokenSettings>> = new Map();
 
 connection.onDidChangeConfiguration(change => {
 	if (hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
 	} else {
-		globalSettings = <ExampleSettings>(
-			(change.settings.languageServerExample || defaultSettings)
+		globalSettings = <JSONColorTokenSettings>(
+			(change.settings.jsonColorToken || defaultSettings)
 		);
 	}
 
@@ -101,7 +105,7 @@ connection.onDidChangeConfiguration(change => {
 	documents.all().forEach(findColorTokens);
 });
 
-function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
+function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings> {
 	if (!hasConfigurationCapability) {
 		return Promise.resolve(globalSettings);
 	}
@@ -134,7 +138,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 
 	// The validator creates diagnostics for all uppercase words length 2 and more
 	let text = textDocument.getText();
-	let pattern = /"#[0-9a-fA-F]{6}"/g;
+	let pattern = /#[0-9a-fA-F]{6}/g;
 	let m: RegExpExecArray | null;
 	colors = [];
 	let problems = 0;
@@ -153,25 +157,33 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 }
 
 function parseColor (color: string): Color {
-	const red = parseInt(color.slice(2, 4), 16)/ 255;
-	const green = parseInt(color.slice(4, 6), 16) / 255;
-	const blue = parseInt(color.slice(6, 8), 16) / 255;
+	const red = parseInt(color.slice(1, 3), 16)/ 255;
+	const green = parseInt(color.slice(3, 5), 16) / 255;
+	const blue = parseInt(color.slice(5, 7), 16) / 255;
 	return {
 		red, green, blue, alpha: 1.0
 	}
 }
 
-// TODO: add support for default to lower case/upper case
-// TODO: handle the case where a color value is written in short handed version 0
-function stringifyColor(color: Color): string {
+function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string {
 	let result = "#";
-	result += Math.floor(color.red * 255).toString(16).toLowerCase();
-	result += Math.floor(color.green * 255).toString(16).toLowerCase();
-	result += Math.floor(color.blue * 255).toString(16).toLowerCase();
+	function valueToCode(val: number): string {
+		let result = Math.floor(val * 255).toString(16);
+		return result.length === 1 ? "0" + result : result;
+	}
+	if (casing === "Lowercase") {
+		result += valueToCode(color.red).toLowerCase();
+		result += valueToCode(color.green).toLowerCase();
+		result += valueToCode(color.blue).toLowerCase();
+	} else {
+		result += valueToCode(color.red).toUpperCase();
+		result += valueToCode(color.green).toUpperCase();
+		result += valueToCode(color.blue).toUpperCase();
+	}
 	return result;
 }
 
-connection.onDocumentColor((params: DocumentColorParams): ColorInformation[] => {
+connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInformation[]> => {
 	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
@@ -182,8 +194,9 @@ connection.onDocumentColor((params: DocumentColorParams): ColorInformation[] => 
 	return colorInformations;
 });
 
-connection.onColorPresentation((params: ColorPresentationParams): ColorPresentation[] => {
-	return [{ label: `"${stringifyColor(params.color)}"` }];
+connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
+	let settings = await getDocumentSettings(params.textDocument.uri);
+	return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 });
 
 // Make the text document manager listen on the connection
