@@ -1,17 +1,12 @@
 {
-	"name": "json-coor-token",
-	"description": "A language server that enables previewing hex color tokens in json documents",
+	"name": "json-color-token",
+	"description": "A language server that enables previewing/editing hex color tokens in json documents",
 	"author": "Chunan Ye",
 	"license": "MIT",
 	"version": "1.0.0-beta.1",
-	"repository": {
-		"type": "git",
-		"url": "TODO"
-	},
 	"publisher": "yechunan",
-	"categories": [],
-	"keywords": [
-		"multi-root ready"
+	"categories": [
+		"Visualization"
 	],
 	"engines": {
 		"vscode": "^1.43.0"
