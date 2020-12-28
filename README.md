@@ -1,6 +1,6 @@
-# JSON color token extension
+# JSON color token
 
-This extension enables hex color token detection in JSON files, provides color preview and color editing through the built-in color picker.
+This repo implements a language server for VSCode. The language server can be installed as an extension. The extension enables hex color token detection in JSON files, provides color preview and color editing through the built-in color picker.
 
 ## Example
 
