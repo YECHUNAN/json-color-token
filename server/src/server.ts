@@ -136,8 +136,8 @@ documents.onDidClose(e => {
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-	findColorTokens(change.document);
+documents.onDidChangeContent(async (change) => {
+	await findColorTokens(change.document);
 });
 
 let colors: IColors[] = [];
@@ -193,6 +193,11 @@ function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string
 }
 
 connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInformation[]> => {
+	const document = documents.get(params.textDocument.uri);
+	if (!document) {
+		return [];
+	}
+	await findColorTokens(document);
 	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
