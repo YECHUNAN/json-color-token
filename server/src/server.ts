@@ -15,7 +15,8 @@
 	Color,
 	DocumentColorParams,
 	ColorPresentationParams,
-	ColorPresentation
+	ColorPresentation,
+	DidChangeTextDocumentParams
 } from 'vscode-languageserver';
 
 import {
@@ -105,6 +106,14 @@ connection.onDidChangeConfiguration(change => {
 	documents.all().forEach(findColorTokens);
 });
 
+// TODO: The intention is to force a color token search when the user switch between opened text files
+connection.onDidChangeTextDocument((change: DidChangeTextDocumentParams) => {
+	const document = documents.get(change.textDocument.uri);
+	if (!!document) {
+		findColorTokens(document);
+	}
+});
+
 function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings> {
 	if (!hasConfigurationCapability) {
 		return Promise.resolve(globalSettings);
@@ -187,7 +196,7 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
-			range: colors[0].range,
+			range: colorObj.range,
 			color: color
 		};
 	});
