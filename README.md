@@ -15,8 +15,7 @@ A json file with hex color tokens
 
 will be rendered as
 
-![rendered-sample](./testfiles/readme-sample-json.jpg)
-
+![rendered-sample](https://raw.githubusercontent.com/YECHUNAN/json-color-token/fc12dbcd57b628ee613bee86f9031500fc5fb870/testfiles/readme-sample-json.jpg)
 
 ## Features
 

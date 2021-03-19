@@ -1,9 +1,13 @@
 {
 	"name": "json-color-token",
 	"description": "A language server that enables previewing/editing hex color tokens in json documents",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/YECHUNAN/json-color-token"
+	},
 	"author": "Chunan Ye",
 	"license": "MIT",
-	"version": "1.0.0-beta.1",
+	"version": "1.0.0",
 	"publisher": "yechunan",
 	"categories": [
 		"Visualization"
