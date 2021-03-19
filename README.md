@@ -8,7 +8,17 @@ A json file with hex color tokens
 
 ```json
 {
-  "colorA": "#123456",
-  "colorB": "#ABCDEF"
+	"colorA": "#DB3333",
+	"colorB": "#B9EC2B"
 }
 ```
+
+will be rendered as
+
+![rendered-sample](./testfiles/readme-sample-json.jpg)
+
+
+## Features
+
+- Preview visual color from hex color tokens
+- Adjust color using the built-in color picker
