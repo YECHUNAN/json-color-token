@@ -21,3 +21,7 @@ will be rendered as
 
 - Preview visual color from hex color tokens
 - Adjust color using the built-in color picker
+
+## External credits
+
+The extension icon is designed using resources from Flaticon.com.
