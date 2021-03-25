@@ -38,6 +38,7 @@
 						"Uppercase",
 						"Lowercase"
 					],
+					"description": "Whether the built-in color picker will set color code as uppercase letters or lowercase letters",
 					"enumDescriptions": [
 						"Color presentation selected in the in-editor color picker will insert color code as uppercase letters (e.g. #AABBCC).",
 						"Color presentation selected in the in-editor color picker will insert color code as lowercase letters (e.g. #aabbcc)."
