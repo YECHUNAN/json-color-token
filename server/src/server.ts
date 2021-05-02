@@ -16,7 +16,9 @@
 	DocumentColorParams,
 	ColorPresentationParams,
 	ColorPresentation,
-	DidChangeTextDocumentParams
+	DidChangeTextDocumentParams,
+	TextDocumentChangeEvent,
+	DidChangeConfigurationParams
 } from 'vscode-languageserver';
 
 import {
@@ -30,6 +32,7 @@ let connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager. 
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+let jsonColorTokenCache: { [documentUri: string]: { [variable: string]: string} } = {};
 
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
@@ -92,7 +95,7 @@ let globalSettings: JSONColorTokenSettings = defaultSettings;
 // Cache the settings of all open documents
 let documentSettings: Map<string, Thenable<JSONColorTokenSettings>> = new Map();
 
-connection.onDidChangeConfiguration(change => {
+connection.onDidChangeConfiguration((change: DidChangeConfigurationParams) => {
 	if (hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
@@ -106,12 +109,16 @@ connection.onDidChangeConfiguration(change => {
 	documents.all().forEach(findColorTokens);
 });
 
-// TODO: The intention is to force a color token search when the user switch between opened text files
+/**
+ * Force a color token search when the user switch between opened text files.
+ * Re-update the color token cache in opened json files.
+ */
 connection.onDidChangeTextDocument((change: DidChangeTextDocumentParams) => {
 	const document = documents.get(change.textDocument.uri);
 	if (!!document) {
 		findColorTokens(document);
 	}
+	documents.all().forEach(updateJsonColorTokenCache);
 });
 
 function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings> {
@@ -131,37 +138,89 @@ function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings>
 
 // Only keep settings for open documents
 documents.onDidClose(e => {
+	if (!!jsonColorTokenCache[e.document.uri]) {
+		delete jsonColorTokenCache[e.document.uri];
+	}
 	documentSettings.delete(e.document.uri);
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(async (change) => {
+documents.onDidChangeContent(async (change: TextDocumentChangeEvent<TextDocument>) => {
+	updateJsonColorTokenCache(change.document);
 	await findColorTokens(change.document);
 });
 
+const colorTokenPattern = /#[0-9a-fA-F]{6}/g;
+
+function isColorToken(token: string | number | undefined): boolean {
+	if (typeof token === "string") {
+		let regex = new RegExp(colorTokenPattern);
+		return regex.test(token);
+	}
+	return false;
+}
+
+async function updateJsonColorTokenCache(textDocument: TextDocument): Promise<void> {
+	if (textDocument.languageId === "json") {
+		let text = textDocument.getText();
+		try {
+			let jsonObj = JSON.parse(text);
+			let colorTokenObj: {[variable: string]: string} = {};
+			for (let key in jsonObj) {
+				if (isColorToken(jsonObj[key])) {
+					colorTokenObj[key] = jsonObj[key];
+				}
+			}
+			jsonColorTokenCache[textDocument.uri] = colorTokenObj;
+		} catch (error) {
+			// Swallow the error
+		}
+	}
+}
+
 let colors: IColors[] = [];
 async function findColorTokens(textDocument: TextDocument): Promise<void> {
-	// In this simple example we get the settings for every validate run.
-	let settings = await getDocumentSettings(textDocument.uri);
-
-	// The validator creates diagnostics for all uppercase words length 2 and more
 	let text = textDocument.getText();
-	let pattern = /#[0-9a-fA-F]{6}/g;
-	let m: RegExpExecArray | null;
-	colors = [];
-	let problems = 0;
-
-	while ((m = pattern.exec(text)) && problems < settings.maxNumberOfColorTokens) {
-		problems++;
+	if (textDocument.languageId === "json") {
+		// In this simple example we get the settings for every validate run.
+		let settings = await getDocumentSettings(textDocument.uri);
 		
-		colors.push({
-			range: {
-				start: textDocument.positionAt(m.index),
-				end: textDocument.positionAt(m.index + m[0].length)
-			}, 
-			color: m[0]
-		});
+		let regex = new RegExp(colorTokenPattern);
+		let m: RegExpExecArray | null;
+		colors = [];
+		let numTokens = 0;
+	
+		while ((m = regex.exec(text)) && numTokens < settings.maxNumberOfColorTokens) {
+			numTokens++;
+			
+			colors.push({
+				range: {
+					start: textDocument.positionAt(m.index),
+					end: textDocument.positionAt(m.index + m[0].length)
+				}, 
+				color: m[0]
+			});
+		}
+	} else if (textDocument.languageId === "css" || textDocument.languageId === "less") {
+		let pattern = /var\(--([a-zA-Z0-9\-]+)\)/g;
+		let m: RegExpExecArray | null;
+		colors = [];
+		while ((m = pattern.exec(text))) {
+			for (let documentUri in jsonColorTokenCache) {
+				let variableName = m[1];
+				if (jsonColorTokenCache[documentUri][variableName]) {
+					colors.push({
+						range: {
+							start: textDocument.positionAt(m.index),
+							end: textDocument.positionAt(m.index + m[0].length)
+						}, 
+						color: jsonColorTokenCache[documentUri][variableName]
+					});
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -209,8 +268,12 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 });
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
-	let settings = await getDocumentSettings(params.textDocument.uri);
-	return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
+	const document = documents.get(params.textDocument.uri);
+	if (!!document && document.languageId === "json") {
+		let settings = await getDocumentSettings(params.textDocument.uri);
+		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
+	}
+	return [];
 });
 
 // Make the text document manager listen on the connection
