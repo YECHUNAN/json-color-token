@@ -151,7 +151,9 @@ documents.onDidChangeContent(async (change: TextDocumentChangeEvent<TextDocument
 	await findColorTokens(change.document);
 });
 
-const colorTokenPattern = /#[0-9a-fA-F]{6}/g;
+// A color token can be with/without opacity (last two digits)
+// e.g. without opacity #000000, with opacity #00000050
+const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;
 
 function isColorToken(token: string | number | undefined): boolean {
 	if (typeof token === "string") {
@@ -228,8 +230,12 @@ function parseColor (color: string): Color {
 	const red = parseInt(color.slice(1, 3), 16)/ 255;
 	const green = parseInt(color.slice(3, 5), 16) / 255;
 	const blue = parseInt(color.slice(5, 7), 16) / 255;
+	let alpha = 1.0;
+	if (color.length === 9) {
+		alpha = parseInt(color.slice(7, 9), 10) / 100;
+	}
 	return {
-		red, green, blue, alpha: 1.0
+		red, green, blue, alpha: alpha
 	}
 }
 
@@ -247,6 +253,9 @@ function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string
 		result += valueToCode(color.red).toUpperCase();
 		result += valueToCode(color.green).toUpperCase();
 		result += valueToCode(color.blue).toUpperCase();
+	}
+	if (color.alpha < 1.0) {
+		result += (color.alpha * 100).toFixed(0);
 	}
 	return result;
 }
