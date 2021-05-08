@@ -17,6 +17,10 @@ will be rendered as
 
 ![rendered-sample](https://raw.githubusercontent.com/YECHUNAN/json-color-token/fc12dbcd57b628ee613bee86f9031500fc5fb870/testfiles/readme-sample-json.jpg)
 
+If referenced in a css file, the referenced variables will show the color preview
+
+![rendererd-sample-css](https://raw.githubusercontent.com/YECHUNAN/json-color-token/feature/preview-referenced-json-color-tokens-in-css-less/images/readme-sample-css.jpg)
+
 ## Features
 
 - Preview visual color from hex color tokens in json files.
