@@ -41,5 +41,6 @@ The extension icon is designed using resources from Flaticon.com.
 
 - New feature:
   - The extension will now cache color tokens in opened json files and show color preview in css/less files when the variable names match.
+- Change the defualt number of maximum color token for preview from 100 to be 1000.
 - Hex color token preview now support alpha values.
 - Hex color token editor can now edit the alpha value using the built-in color editor.
