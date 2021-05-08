@@ -19,8 +19,9 @@ will be rendered as
 
 ## Features
 
-- Preview visual color from hex color tokens
-- Adjust color using the built-in color picker
+- Preview visual color from hex color tokens in json files.
+- Cache variables in opened json files that are like color tokens and preview them in referenced css/less files.
+- Adjust color using the built-in color picker in json files.
 
 ## External credits
 
