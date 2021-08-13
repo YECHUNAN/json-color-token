@@ -37,8 +37,11 @@ export function activate(context: ExtensionContext) {
 
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
-		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'json' }, { scheme: 'file', language: 'css' }, { scheme: 'file', language: 'less' }],
+		// Register the server for json, jsonc files
+		documentSelector: [
+			{ scheme: 'file', language: 'json' },
+			{ scheme: 'file', language: 'jsonc'}
+		],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
