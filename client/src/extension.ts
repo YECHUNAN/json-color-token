@@ -12,7 +12,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from "vscode-languageclient";
-import { defaultSettings, languagesToExclude } from "./constants";
+import { defaultSettings, cssLanguages } from "./constants";
 
 let client: LanguageClient;
 
@@ -45,9 +45,9 @@ export function activate(context: ExtensionContext) {
 	}
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
-		// Register the server for json, jsonc files
-		documentSelector: languages
-			.filter((lang) => languagesToExclude.indexOf(lang) < 0)
+		// Register the server for json, jsonc files (color token detection)
+		// and css files for color token variable preview
+		documentSelector: [...languages, ...cssLanguages]
 			.map((lang) => {
 				return {
 					scheme: "file", language: lang

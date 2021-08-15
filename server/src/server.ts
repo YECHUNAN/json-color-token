@@ -25,7 +25,7 @@ import {
 	TextDocument
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
-import { JSONColorTokenSettings, defaultSettings, languagesToExclude } from "./constants";
+import { JSONColorTokenSettings, defaultSettings, cssLanguages } from "./constants";
 
 // Create a connection for the server, using Node"s IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -84,12 +84,12 @@ let globalSettings: JSONColorTokenSettings = defaultSettings;
 let documentSettings: Map<string, Thenable<JSONColorTokenSettings>> = new Map();
 let cachedLanguages: string[] | undefined = undefined;
 
-async function isLanguageIncluded(languageId: string): Promise<boolean> {
+async function isLanguageIncludedForColorTokenDetection(languageId: string): Promise<boolean> {
 	if (!cachedLanguages) {
 		const settings = await getRemoteConfiguration() as JSONColorTokenSettings;
 		cachedLanguages = settings.languages; 
 	}
-	return languagesToExclude.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
+	return cssLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
 
 connection.onDidChangeConfiguration((change: DidChangeConfigurationParams) => {
@@ -165,7 +165,7 @@ function isColorToken(token: string | number | undefined): boolean {
 }
 
 async function updateJsonColorTokenCache(textDocument: TextDocument): Promise<void> {
-	if (await isLanguageIncluded(textDocument.languageId)) {
+	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
 		let text = textDocument.getText();
 		try {
 			let jsonObj = JSON.parse(text);
@@ -190,7 +190,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 	const { maxNumberOfColorTokens } = settings; 
 	console.log("languageId", textDocument.languageId);
 
-	if (await isLanguageIncluded(textDocument.languageId)) {
+	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
 		let regex = new RegExp(colorTokenPattern);
 		let m: RegExpExecArray | null;
 		colors = [];
@@ -282,7 +282,7 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
 	const document = documents.get(params.textDocument.uri);
-	if (!!document && await isLanguageIncluded(document.languageId)) {
+	if (!!document && await isLanguageIncludedForColorTokenDetection(document.languageId)) {
 		let settings = await getDocumentSettings(params.textDocument.uri);
 		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 	}

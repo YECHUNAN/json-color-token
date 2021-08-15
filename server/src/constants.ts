@@ -31,6 +31,7 @@ export const defaultSettings: JSONColorTokenSettings = {
 };
 
 /**
- * Languages to exclude when applying the color token detection and preview.
+ * Css languages to exclude for color token detection and preview.
+ * Detected color tokens that are referenced in css documents will also present a color preview.
  */
-export const languagesToExclude: string[] = ["css", "less"];
+export const cssLanguages: string[] = ["css", "less"];
