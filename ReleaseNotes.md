@@ -16,3 +16,8 @@
 - Change the defualt number of maximum color token for preview from 100 to be 1000.
 - Hex color token preview now support alpha values.
 - Hex color token editor can now edit the alpha value using the built-in color editor.
+
+## 1.2.0 (in progress)
+
+- New feature:
+  - Add a setting to allow applyting the color token detection and previewing feature on any language except for css and less.
