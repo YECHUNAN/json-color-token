@@ -19,14 +19,15 @@
 	DidChangeTextDocumentParams,
 	TextDocumentChangeEvent,
 	DidChangeConfigurationParams
-} from 'vscode-languageserver';
+} from "vscode-languageserver";
 
 import {
 	TextDocument
-} from 'vscode-languageserver-textdocument';
-import { IColors } from './IColors';
+} from "vscode-languageserver-textdocument";
+import { IColors } from "./IColors";
+import { JSONColorTokenSettings, defaultSettings } from "./constants";
 
-// Create a connection for the server, using Node's IPC as a transport.
+// Create a connection for the server, using Node"s IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
 
@@ -72,28 +73,24 @@ connection.onInitialized(() => {
 	}
 	if (hasWorkspaceFolderCapability) {
 		connection.workspace.onDidChangeWorkspaceFolders(_event => {
-			connection.console.log('Workspace folder change event received.');
+			connection.console.log("Workspace folder change event received.");
 		});
 	}
 });
 
-// The example settings
-interface JSONColorTokenSettings {
-	maxNumberOfColorTokens: number;
-	colorTokenCasing: "Uppercase" | "Lowercase";
-}
-
-// The global settings, used when the `workspace/configuration` request is not supported by the client.
-// Please note that this is not the case when using this server with the client provided in this example
-// but could happen with other clients.
-const defaultSettings: JSONColorTokenSettings = { 
-	maxNumberOfColorTokens: 1000,
-	colorTokenCasing: "Uppercase"
-};
 let globalSettings: JSONColorTokenSettings = defaultSettings;
 
 // Cache the settings of all open documents
 let documentSettings: Map<string, Thenable<JSONColorTokenSettings>> = new Map();
+let cachedLanguages: string[] | undefined = undefined;
+
+async function isLanguageIncluded(languageId: string): Promise<boolean> {
+	if (!cachedLanguages) {
+		const settings = await getRemoteConfiguration() as JSONColorTokenSettings;
+		cachedLanguages = settings.languages; 
+	}
+	return cachedLanguages.indexOf(languageId) >= 0;
+}
 
 connection.onDidChangeConfiguration((change: DidChangeConfigurationParams) => {
 	if (hasConfigurationCapability) {
@@ -127,13 +124,17 @@ function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings>
 	}
 	let result = documentSettings.get(resource);
 	if (!result) {
-		result = connection.workspace.getConfiguration({
-			scopeUri: resource,
-			section: 'jsonColorToken'
-		});
+		result = getRemoteConfiguration(resource);
 		documentSettings.set(resource, result);
 	}
 	return result;
+}
+
+function getRemoteConfiguration(resource?: string): Promise<any> {
+	return connection.workspace.getConfiguration({
+		scopeUri: resource,
+		section: "jsonColorToken"
+	});
 }
 
 // Only keep settings for open documents
@@ -164,7 +165,7 @@ function isColorToken(token: string | number | undefined): boolean {
 }
 
 async function updateJsonColorTokenCache(textDocument: TextDocument): Promise<void> {
-	if (textDocument.languageId === "json") {
+	if (await isLanguageIncluded(textDocument.languageId)) {
 		let text = textDocument.getText();
 		try {
 			let jsonObj = JSON.parse(text);
@@ -183,17 +184,19 @@ async function updateJsonColorTokenCache(textDocument: TextDocument): Promise<vo
 
 let colors: IColors[] = [];
 async function findColorTokens(textDocument: TextDocument): Promise<void> {
-	let text = textDocument.getText();
-	if (textDocument.languageId === "json") {
-		// In this simple example we get the settings for every validate run.
-		let settings = await getDocumentSettings(textDocument.uri);
-		
+	const text = textDocument.getText();
+	// Get the maxNumberOfColorTokens for every run.
+	const settings = await getDocumentSettings(textDocument.uri);
+	const { maxNumberOfColorTokens } = settings; 
+	console.log("languageId", textDocument.languageId);
+
+	if (await isLanguageIncluded(textDocument.languageId)) {
 		let regex = new RegExp(colorTokenPattern);
 		let m: RegExpExecArray | null;
 		colors = [];
 		let numTokens = 0;
 	
-		while ((m = regex.exec(text)) && numTokens < settings.maxNumberOfColorTokens) {
+		while ((m = regex.exec(text)) && numTokens < maxNumberOfColorTokens) {
 			numTokens++;
 			
 			colors.push({
@@ -205,6 +208,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 			});
 		}
 	} else if (textDocument.languageId === "css" || textDocument.languageId === "less") {
+		// Get reference to style variables
 		let pattern = /var\(--([a-zA-Z0-9\-]+)\)/g;
 		let m: RegExpExecArray | null;
 		colors = [];
@@ -278,7 +282,7 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
 	const document = documents.get(params.textDocument.uri);
-	if (!!document && document.languageId === "json") {
+	if (!!document && await isLanguageIncluded(document.languageId)) {
 		let settings = await getDocumentSettings(params.textDocument.uri);
 		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 	}

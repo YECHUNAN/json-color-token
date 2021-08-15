@@ -26,7 +26,6 @@
 			"title": "JSON Color Token",
 			"properties": {
 				"jsonColorToken.maxNumberOfColorTokens": {
-					"scope": "resource",
 					"type": "number",
 					"default": 1000,
 					"description": "Controls the maximum number of color tokens to show preview color."
@@ -43,6 +42,11 @@
 						"Color presentation selected in the in-editor color picker will insert color code as uppercase letters (e.g. #AABBCC).",
 						"Color presentation selected in the in-editor color picker will insert color code as lowercase letters (e.g. #aabbcc)."
 					]
+				},
+				"jsonColorToken.languages": {
+					"type": "array",
+					"default": ["json", "jsonc"],
+					"description": "Languages for which to enable the extension features. Only applied when the extension starts. To enable/disable the feature on a certain type, modify the setting and restart the extension. Css and Less files will always be excluded."
 				}
 			}
 		}

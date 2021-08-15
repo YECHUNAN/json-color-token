@@ -1,4 +1,4 @@
-import { Position } from 'vscode-languageserver';
+import { Position } from "vscode-languageserver";
 
 export interface IColors {
 	color: string,
