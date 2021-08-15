@@ -12,7 +12,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from "vscode-languageclient";
-import { defaultSettings } from "./constants";
+import { defaultSettings, languagesToExclude } from "./constants";
 
 let client: LanguageClient;
 
@@ -46,11 +46,13 @@ export function activate(context: ExtensionContext) {
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for json, jsonc files
-		documentSelector: languages.map((lang) => {
-			return {
-				scheme: "file", language: lang
-			};
-		}),
+		documentSelector: languages
+			.filter((lang) => languagesToExclude.indexOf(lang) < 0)
+			.map((lang) => {
+				return {
+					scheme: "file", language: lang
+				};
+			}),
 		synchronize: {
 			// Notify the server about file changes to ".clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher("**/.clientrc")

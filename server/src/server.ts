@@ -25,7 +25,7 @@ import {
 	TextDocument
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
-import { JSONColorTokenSettings, defaultSettings } from "./constants";
+import { JSONColorTokenSettings, defaultSettings, languagesToExclude } from "./constants";
 
 // Create a connection for the server, using Node"s IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -89,7 +89,7 @@ async function isLanguageIncluded(languageId: string): Promise<boolean> {
 		const settings = await getRemoteConfiguration() as JSONColorTokenSettings;
 		cachedLanguages = settings.languages; 
 	}
-	return cachedLanguages.indexOf(languageId) >= 0;
+	return languagesToExclude.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
 
 connection.onDidChangeConfiguration((change: DidChangeConfigurationParams) => {
