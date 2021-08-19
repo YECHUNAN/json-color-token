@@ -34,3 +34,7 @@ The extension icon is designed using resources from Flaticon.com.
 ## Release notes
 
 See features and fixes for each released versions at [release notes](https://github.com/YECHUNAN/json-color-token/blob/feature/preview-referenced-json-color-tokens-in-css-less/ReleaseNotes.md).
+
+## License
+
+Excluding all the node modules, which have their own licenses and are obvious what those licenses are, a significant portion of the source code in the extension is contributed by Microsoft under the MIT license in their sample language service provider project [lsp-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/lsp-sample). All the source code that originated from the lsp-sample project have the license header in the file and are subject to the original MIT license. All the source code contributed by other authors are in MIT license as well.
