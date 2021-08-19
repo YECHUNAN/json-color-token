@@ -25,3 +25,7 @@
 
 - New feature:
   - Add a setting to allow applyting the color token detection and previewing feature on any language except for css and less.
+
+- Known issues:
+
+  The language server is only able to parse color tokens in JSON files and preview them in css/less files. This is due to the lack of a standard parser for non-JSON formatted configuration files in NodeJS.

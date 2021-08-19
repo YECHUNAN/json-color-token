@@ -35,3 +35,4 @@ export const defaultSettings: JSONColorTokenSettings = {
  * Detected color tokens that are referenced in css documents will also present a color preview.
  */
  export const cssLanguages: string[] = ["css", "less"];
+ 
