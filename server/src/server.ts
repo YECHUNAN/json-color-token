@@ -115,7 +115,7 @@ connection.onDidChangeTextDocument((change: DidChangeTextDocumentParams) => {
 	if (!!document) {
 		findColorTokens(document);
 	}
-	documents.all().forEach(updateJsonColorTokenCache);
+	documents.all().forEach(updateColorTokenCache);
 });
 
 function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings> {
@@ -148,7 +148,7 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(async (change: TextDocumentChangeEvent<TextDocument>) => {
-	updateJsonColorTokenCache(change.document);
+	updateColorTokenCache(change.document);
 	await findColorTokens(change.document);
 });
 
@@ -160,7 +160,7 @@ function isColorToken(token: string | number | undefined): boolean {
 	return false;
 }
 
-async function updateJsonColorTokenCache(textDocument: TextDocument): Promise<void> {
+async function updateColorTokenCache(textDocument: TextDocument): Promise<void> {
 	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
 		let text = textDocument.getText();
 		try {

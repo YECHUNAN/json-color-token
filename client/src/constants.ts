@@ -1,9 +1,4 @@
 /**
- * Make sure this file is in sync with server/src/constants
- * @todo Find out a way to share code between client and server.
- */
-
-/**
  * Settings of json-color-token
  */
 export interface JSONColorTokenSettings {
