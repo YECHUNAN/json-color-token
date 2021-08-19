@@ -35,3 +35,8 @@ export const defaultSettings: JSONColorTokenSettings = {
  * Detected color tokens that are referenced in css documents will also present a color preview.
  */
 export const cssLanguages: string[] = ["css", "less"];
+
+/* A color token can be with/without opacity (last two digits)
+ * e.g. without opacity #000000, with opacity #00000050
+ */
+export const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;

@@ -25,7 +25,7 @@ import {
 	TextDocument
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
-import { JSONColorTokenSettings, defaultSettings, cssLanguages } from "./constants";
+import { JSONColorTokenSettings, defaultSettings, cssLanguages, colorTokenPattern } from "./constants";
 
 // Create a connection for the server, using Node"s IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -33,7 +33,7 @@ let connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager. 
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-let jsonColorTokenCache: { [documentUri: string]: { [variable: string]: string} } = {};
+let colorTokenCache: { [documentUri: string]: { [variable: string]: string} } = {};
 
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
@@ -139,8 +139,8 @@ function getRemoteConfiguration(resource?: string): Promise<any> {
 
 // Only keep settings for open documents
 documents.onDidClose(e => {
-	if (!!jsonColorTokenCache[e.document.uri]) {
-		delete jsonColorTokenCache[e.document.uri];
+	if (!!colorTokenCache[e.document.uri]) {
+		delete colorTokenCache[e.document.uri];
 	}
 	documentSettings.delete(e.document.uri);
 });
@@ -151,10 +151,6 @@ documents.onDidChangeContent(async (change: TextDocumentChangeEvent<TextDocument
 	updateJsonColorTokenCache(change.document);
 	await findColorTokens(change.document);
 });
-
-// A color token can be with/without opacity (last two digits)
-// e.g. without opacity #000000, with opacity #00000050
-const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;
 
 function isColorToken(token: string | number | undefined): boolean {
 	if (typeof token === "string") {
@@ -175,7 +171,7 @@ async function updateJsonColorTokenCache(textDocument: TextDocument): Promise<vo
 					colorTokenObj[key] = jsonObj[key];
 				}
 			}
-			jsonColorTokenCache[textDocument.uri] = colorTokenObj;
+			colorTokenCache[textDocument.uri] = colorTokenObj;
 		} catch (error) {
 			// Swallow the error
 		}
@@ -188,7 +184,6 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 	// Get the maxNumberOfColorTokens for every run.
 	const settings = await getDocumentSettings(textDocument.uri);
 	const { maxNumberOfColorTokens } = settings; 
-	console.log("languageId", textDocument.languageId);
 
 	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
 		let regex = new RegExp(colorTokenPattern);
@@ -207,21 +202,21 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 				color: m[0]
 			});
 		}
-	} else if (textDocument.languageId === "css" || textDocument.languageId === "less") {
+	} else if (cssLanguages.indexOf(textDocument.languageId) >= 0 ) {
 		// Get reference to style variables
 		let pattern = /var\(--([a-zA-Z0-9\-]+)\)/g;
 		let m: RegExpExecArray | null;
 		colors = [];
 		while ((m = pattern.exec(text))) {
-			for (let documentUri in jsonColorTokenCache) {
+			for (let documentUri in colorTokenCache) {
 				let variableName = m[1];
-				if (jsonColorTokenCache[documentUri][variableName]) {
+				if (colorTokenCache[documentUri][variableName]) {
 					colors.push({
 						range: {
 							start: textDocument.positionAt(m.index),
 							end: textDocument.positionAt(m.index + m[0].length)
 						}, 
-						color: jsonColorTokenCache[documentUri][variableName]
+						color: colorTokenCache[documentUri][variableName]
 					});
 					break;
 				}
