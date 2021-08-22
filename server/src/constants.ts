@@ -24,7 +24,7 @@ export interface JSONColorTokenSettings {
 }
 
 // The default settings, used when the `workspace/configuration` request is not supported by the client.
-export const defaultSettings: JSONColorTokenSettings = { 
+export const defaultSettings: JSONColorTokenSettings = {
 	maxNumberOfColorTokens: 1000,
 	colorTokenCasing: "Uppercase",
 	languages: ["json", "jsonc"]
@@ -40,3 +40,7 @@ export const cssLanguages: string[] = ["css", "less"];
  * e.g. without opacity #000000, with opacity #00000050
  */
 export const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;
+
+export const cssVariablePattern = /var\(--(?<cssVar>[a-zA-Z0-9\-]+)\)/g;
+
+export const jsonKeyPattern = /(((?<=")(?<varDoulbeQuote>[a-zA-Z0-9-_]+)(?="\s*:))|((?<=')(?<varSingleQuote>[a-zA-Z0-9-_]+)(?='\s*:)))/g;

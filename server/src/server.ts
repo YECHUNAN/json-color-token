@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
- import {
+import {
 	createConnection,
 	TextDocuments,
 	ProposedFeatures,
@@ -18,14 +18,23 @@
 	ColorPresentation,
 	DidChangeTextDocumentParams,
 	TextDocumentChangeEvent,
-	DidChangeConfigurationParams
+	DidChangeConfigurationParams,
+	DefinitionParams,
+	Definition,
+	Range
 } from "vscode-languageserver";
-
 import {
 	TextDocument
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
-import { JSONColorTokenSettings, defaultSettings, cssLanguages, colorTokenPattern } from "./constants";
+import {
+	JSONColorTokenSettings,
+	defaultSettings,
+	cssLanguages,
+	colorTokenPattern,
+	cssVariablePattern,
+	jsonKeyPattern
+} from "./constants";
 
 // Create a connection for the server, using Node"s IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -33,7 +42,11 @@ let connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager. 
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-let colorTokenCache: { [documentUri: string]: { [variable: string]: string} } = {};
+let colorTokenCache: {
+	[documentUri: string]: {
+		[variable: string]: { color: string, range: Range }
+	}
+} = {};
 
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
@@ -53,7 +66,8 @@ connection.onInitialize((params: InitializeParams) => {
 	const result: InitializeResult = {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
-			colorProvider: true
+			colorProvider: true,
+			definitionProvider: true
 		}
 	};
 	if (hasWorkspaceFolderCapability) {
@@ -87,7 +101,7 @@ let cachedLanguages: string[] | undefined = undefined;
 async function isLanguageIncludedForColorTokenDetection(languageId: string): Promise<boolean> {
 	if (!cachedLanguages) {
 		const settings = await getRemoteConfiguration() as JSONColorTokenSettings;
-		cachedLanguages = settings.languages; 
+		cachedLanguages = settings.languages;
 	}
 	return cssLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
@@ -165,12 +179,27 @@ async function updateColorTokenCache(textDocument: TextDocument): Promise<void> 
 		let text = textDocument.getText();
 		try {
 			let jsonObj = JSON.parse(text);
-			let colorTokenObj: {[variable: string]: string} = {};
-			for (let key in jsonObj) {
-				if (isColorToken(jsonObj[key])) {
-					colorTokenObj[key] = jsonObj[key];
+			let colorTokenObj: {
+				[variable: string]: {
+					color: string,
+					range: Range
+				}
+			} = {};
+			const regex = new RegExp(jsonKeyPattern);
+			let m: RegExpExecArray | null;
+			while ((m = regex.exec(text))) {
+				const variableName = m.groups?.varDoulbeQuote ?? m.groups?.varSingleQuote;
+				if (!!variableName && isColorToken(jsonObj[variableName])) {
+					colorTokenObj[variableName] = {
+						color: jsonObj[variableName],
+						range: {
+							start: textDocument.positionAt(m.index),
+							end: textDocument.positionAt(m.index + variableName.length)
+						}
+					}
 				}
 			}
+
 			colorTokenCache[textDocument.uri] = colorTokenObj;
 		} catch (error) {
 			// Swallow the error
@@ -183,50 +212,49 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 	const text = textDocument.getText();
 	// Get the maxNumberOfColorTokens for every run.
 	const settings = await getDocumentSettings(textDocument.uri);
-	const { maxNumberOfColorTokens } = settings; 
+	const { maxNumberOfColorTokens } = settings;
 
 	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
 		let regex = new RegExp(colorTokenPattern);
 		let m: RegExpExecArray | null;
 		colors = [];
 		let numTokens = 0;
-	
+
 		while ((m = regex.exec(text)) && numTokens < maxNumberOfColorTokens) {
 			numTokens++;
-			
+
 			colors.push({
 				range: {
 					start: textDocument.positionAt(m.index),
 					end: textDocument.positionAt(m.index + m[0].length)
-				}, 
+				},
 				color: m[0]
 			});
 		}
-	} else if (cssLanguages.indexOf(textDocument.languageId) >= 0 ) {
+	} else if (cssLanguages.indexOf(textDocument.languageId) >= 0) {
 		// Get reference to style variables
-		let pattern = /var\(--([a-zA-Z0-9\-]+)\)/g;
+		const regex = new RegExp(cssVariablePattern);
 		let m: RegExpExecArray | null;
 		colors = [];
-		while ((m = pattern.exec(text))) {
-			for (let documentUri in colorTokenCache) {
-				let variableName = m[1];
-				if (colorTokenCache[documentUri][variableName]) {
-					colors.push({
-						range: {
-							start: textDocument.positionAt(m.index),
-							end: textDocument.positionAt(m.index + m[0].length)
-						}, 
-						color: colorTokenCache[documentUri][variableName]
-					});
-					break;
-				}
+		while ((m = regex.exec(text))) {
+			let variableName = m.groups?.cssVar || "";
+			// Show color preview of the first matching color token in color token cache
+			const documentUri = Object.keys(colorTokenCache).find((uri) => !!colorTokenCache[uri][variableName]);
+			if (!!documentUri) {
+				colors.push({
+					range: {
+						start: textDocument.positionAt(m.index),
+						end: textDocument.positionAt(m.index + m[0].length)
+					},
+					color: colorTokenCache[documentUri][variableName].color
+				});
 			}
 		}
 	}
 }
 
-function parseColor (color: string): Color {
-	const red = parseInt(color.slice(1, 3), 16)/ 255;
+function parseColor(color: string): Color {
+	const red = parseInt(color.slice(1, 3), 16) / 255;
 	const green = parseInt(color.slice(3, 5), 16) / 255;
 	const blue = parseInt(color.slice(5, 7), 16) / 255;
 	let alpha = 1.0;
@@ -258,6 +286,36 @@ function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string
 	}
 	return result;
 }
+
+// For color token variables referenced in css/less files,
+// go to definition will bring to the json file where the token is defined.
+connection.onDefinition((params: DefinitionParams): Definition | undefined => {
+	const { textDocument, position } = params;
+	const textDocumentObj = documents.get(textDocument.uri);
+	if (!textDocumentObj) {
+		return;
+	}
+	const languageID = textDocumentObj.languageId;
+	if (cssLanguages.indexOf(languageID) >= 0) {
+		// Get the line of the text and try to parse out the first referenced css variable, if any
+		const regex = new RegExp(cssVariablePattern);
+		const lineText = textDocumentObj.getText({
+			start: { line: position.line, character: 0 },
+			end: { line: position.line + 1, character: 0 }
+		});
+		const m = regex.exec(lineText);
+		if (!!m) {
+			const variableName = m.groups?.cssVar || "";
+			const documentUris = Object.keys(colorTokenCache).filter((uri) => !!colorTokenCache[uri][variableName]);
+			return documentUris.map((uri) => {
+				return {
+					uri: uri,
+					range: colorTokenCache[uri][variableName].range
+				};
+			});
+		}
+	}
+});
 
 connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInformation[]> => {
 	const document = documents.get(params.textDocument.uri);
