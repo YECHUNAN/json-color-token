@@ -1,0 +1,6 @@
+// Comment of a jsonc document. A color token in comment #00ff00 for testing.
+{
+	"colorA": "#88FF00",
+	"colorB": "#FFFFFF",
+	"colorC": "#0004FF"
+}

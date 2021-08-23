@@ -7,7 +7,7 @@
 	"publisher": "vscode",
 	"repository": {
 		"type": "git",
-		"url": "TODO"
+		"url": "https://github.com/YECHUNAN/json-color-token"
 	},
 	"engines": {
 		"vscode": "^1.43.0"

@@ -8,7 +8,7 @@
 	},
 	"author": "Chunan Ye",
 	"license": "MIT",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"publisher": "yechunan",
 	"categories": [
 		"Visualization"
@@ -26,7 +26,6 @@
 			"title": "JSON Color Token",
 			"properties": {
 				"jsonColorToken.maxNumberOfColorTokens": {
-					"scope": "resource",
 					"type": "number",
 					"default": 1000,
 					"description": "Controls the maximum number of color tokens to show preview color."
@@ -43,6 +42,14 @@
 						"Color presentation selected in the in-editor color picker will insert color code as uppercase letters (e.g. #AABBCC).",
 						"Color presentation selected in the in-editor color picker will insert color code as lowercase letters (e.g. #aabbcc)."
 					]
+				},
+				"jsonColorToken.languages": {
+					"type": "array",
+					"default": [
+						"json",
+						"jsonc"
+					],
+					"description": "Languages to enable the extension features for. The extension must be restarted for an updated set of languages to take effect.\n\nFor languages that already have built-in color token preview support (e.g. css or less), it is highly recommended to not add them to this setting."
 				}
 			}
 		}

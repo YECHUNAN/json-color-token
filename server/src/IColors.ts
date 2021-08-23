@@ -1,4 +1,9 @@
-import { Position } from 'vscode-languageserver';
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Chunan Ye. All rights reserved.
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
+
+import { Position } from "vscode-languageserver";
 
 export interface IColors {
 	color: string,

@@ -9,7 +9,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "TODO"
+		"url": "https://github.com/YECHUNAN/json-color-token"
 	},
 	"dependencies": {
 		"vscode-languageserver": "^6.1.1",
