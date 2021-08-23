@@ -17,7 +17,7 @@
 - Hex color token preview now support alpha values.
 - Hex color token editor can now edit the alpha value using the built-in color editor.
 
-## 1.2.0 (in progress)
+## 1.2.0
 
 - License change
 
