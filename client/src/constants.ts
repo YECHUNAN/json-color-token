@@ -24,7 +24,7 @@ export interface JSONColorTokenSettings {
 }
 
 // The default settings, used when the `workspace/configuration` request is not supported by the client.
-export const defaultSettings: JSONColorTokenSettings = { 
+export const defaultSettings: JSONColorTokenSettings = {
 	maxNumberOfColorTokens: 1000,
 	colorTokenCasing: "Uppercase",
 	languages: ["json", "jsonc"]
@@ -34,5 +34,4 @@ export const defaultSettings: JSONColorTokenSettings = {
  * Css languages to exclude for color token detection and preview.
  * Detected color tokens that are referenced in css documents will also present a color preview.
  */
- export const cssLanguages: string[] = ["css", "less"];
- 
+export const cssLanguages: string[] = ["css", "less"];
