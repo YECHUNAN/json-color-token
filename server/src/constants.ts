@@ -44,3 +44,5 @@ export const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;
 export const cssVariablePattern = /var\(--(?<cssVar>[a-zA-Z0-9\-]+)\)/g;
 
 export const jsonKeyPattern = /(((?<=")(?<varDoulbeQuote>[a-zA-Z0-9-_]+)(?="\s*:))|((?<=')(?<varSingleQuote>[a-zA-Z0-9-_]+)(?='\s*:)))/g;
+
+export const maxNumberOfColorTokensNotificationNamespace = "JSONCOLORTOKEN.maxNumberOfColorTokens";

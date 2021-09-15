@@ -33,7 +33,8 @@ import {
 	cssLanguages,
 	colorTokenPattern,
 	cssVariablePattern,
-	jsonKeyPattern
+	jsonKeyPattern,
+	maxNumberOfColorTokensNotificationNamespace
 } from "./constants";
 
 // Create a connection for the server, using Node"s IPC as a transport.
@@ -230,6 +231,11 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 				},
 				color: m[0]
 			});
+		}
+		// If max number of color token is reached, show an info notification 
+		// and don't show this notification until a predefined amout of time has passed.
+		if (numTokens === maxNumberOfColorTokens) {
+			connection.sendNotification(maxNumberOfColorTokensNotificationNamespace, { count: maxNumberOfColorTokens });
 		}
 	} else if (cssLanguages.indexOf(textDocument.languageId) >= 0) {
 		// Get reference to style variables
