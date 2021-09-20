@@ -35,3 +35,12 @@ export const defaultSettings: JSONColorTokenSettings = {
  * Detected color tokens that are referenced in css documents will also present a color preview.
  */
 export const cssLanguages: string[] = ["css", "less"];
+
+export const maxNumberOfColorTokensNotificationNamespace = "JSONCOLORTOKEN.maxNumberOfColorTokens";
+/**
+ * Minimum amount of time in seconds between two maxNumberOfColorTokensNoftification.
+ * The likelihood of exceeding the number of tokens is expected to be low.
+ * Make sure this number is large enough to not annoy user.
+ * @todo: See if this needs to be configurable.
+ */
+export const maxNumberOfColorTokensNotificationInterval: number = 8 * 60 * 60; // 8 hours

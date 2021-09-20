@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from "path";
-import { workspace, ExtensionContext } from "vscode";
+import { workspace, ExtensionContext, window as VSCodeWindow } from "vscode";
 
 import {
 	LanguageClient,
@@ -12,9 +12,22 @@ import {
 	ServerOptions,
 	TransportKind
 } from "vscode-languageclient";
-import { defaultSettings, cssLanguages } from "./constants";
+import {
+	defaultSettings,
+	cssLanguages,
+	maxNumberOfColorTokensNotificationNamespace,
+	maxNumberOfColorTokensNotificationInterval
+} from "./constants";
 
 let client: LanguageClient;
+
+/**
+ * @param count Limit of the number of color tokens to be parsed.
+ * @todo Loc
+ */
+function getmaxNumberOfColorTokensNotificationMessage(count: number): string {
+	return `The number of color tokens detected has reached the limit: ${count}. Please consider increasing the limit in the configuration.`;
+}
 
 export function activate(context: ExtensionContext) {
 	// The server is implemented in node
@@ -66,6 +79,17 @@ export function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
+
+	let lastNotificationTimeInSec: number | undefined = undefined;
+	client.onReady().then(() => {
+		client.onNotification(maxNumberOfColorTokensNotificationNamespace, (args: { count: number }) => {
+			const currentTimeInSec = Date.now();
+			if (!lastNotificationTimeInSec || (currentTimeInSec - lastNotificationTimeInSec) > maxNumberOfColorTokensNotificationInterval) {
+				VSCodeWindow.showInformationMessage(getmaxNumberOfColorTokensNotificationMessage(args.count));
+				lastNotificationTimeInSec = currentTimeInSec;
+			}
+		});
+	});
 
 	// Start the client. This will also launch the server
 	client.start();
