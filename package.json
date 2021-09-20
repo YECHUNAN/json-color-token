@@ -49,7 +49,7 @@
 						"json",
 						"jsonc"
 					],
-					"description": "Languages to enable the extension features for. The extension must be restarted for an updated set of languages to take effect.\n\nFor languages that already have built-in color token preview support (e.g. css or less), it is highly recommended to not add them to this setting."
+					"description": "Languages to enable the extension features for. The extension must be restarted for an updated set of languages to take effect.\n\nFor languages that already have built-in color token preview support (e.g. css or less), it is not recommended to add them to this setting."
 				}
 			}
 		}

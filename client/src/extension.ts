@@ -26,7 +26,7 @@ let client: LanguageClient;
  * @todo Loc
  */
 function getmaxNumberOfColorTokensNotificationMessage(count: number): string {
-	return `The number of color tokens detected has reached the limit: ${count}. Please consider increase the limit in the configuration.`;
+	return `The number of color tokens detected has reached the limit: ${count}. Please consider increasing the limit in the configuration.`;
 }
 
 export function activate(context: ExtensionContext) {
