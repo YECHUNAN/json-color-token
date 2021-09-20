@@ -8,7 +8,6 @@ import {
 	TextDocuments,
 	ProposedFeatures,
 	InitializeParams,
-	DidChangeConfigurationNotification,
 	TextDocumentSyncKind,
 	InitializeResult,
 	ColorInformation,
@@ -16,9 +15,7 @@ import {
 	DocumentColorParams,
 	ColorPresentationParams,
 	ColorPresentation,
-	DidChangeTextDocumentParams,
 	TextDocumentChangeEvent,
-	DidChangeConfigurationParams,
 	DefinitionParams,
 	Definition,
 	Range
@@ -82,10 +79,6 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 connection.onInitialized(() => {
-	if (hasConfigurationCapability) {
-		// Register for all configuration changes.
-		connection.client.register(DidChangeConfigurationNotification.type, undefined);
-	}
 	if (hasWorkspaceFolderCapability) {
 		connection.workspace.onDidChangeWorkspaceFolders(_event => {
 			connection.console.log("Workspace folder change event received.");
@@ -107,47 +100,17 @@ async function isLanguageIncludedForColorTokenDetection(languageId: string): Pro
 	return cssLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
 
-connection.onDidChangeConfiguration((change: DidChangeConfigurationParams) => {
-	if (hasConfigurationCapability) {
-		// Reset all cached document settings
-		documentSettings.clear();
-	} else {
-		globalSettings = <JSONColorTokenSettings>(
-			(change.settings.jsonColorToken || defaultSettings)
-		);
-	}
-
-	// Revalidate all open text documents
-	documents.all().forEach(findColorTokens);
-});
-
-/**
- * Force a color token search when the user switch between opened text files.
- * Re-update the color token cache in opened json files.
- */
-connection.onDidChangeTextDocument((change: DidChangeTextDocumentParams) => {
-	const document = documents.get(change.textDocument.uri);
-	if (!!document) {
-		findColorTokens(document);
-	}
-	documents.all().forEach(updateColorTokenCache);
-});
-
-function getDocumentSettings(resource: string): Thenable<JSONColorTokenSettings> {
+function getGlobalSettings(): Thenable<JSONColorTokenSettings> {
 	if (!hasConfigurationCapability) {
 		return Promise.resolve(globalSettings);
 	}
-	let result = documentSettings.get(resource);
-	if (!result) {
-		result = getRemoteConfiguration(resource);
-		documentSettings.set(resource, result);
-	}
+	let result = getRemoteConfiguration();
 	return result;
 }
 
-function getRemoteConfiguration(resource?: string): Promise<any> {
+function getRemoteConfiguration(): Promise<any> {
 	return connection.workspace.getConfiguration({
-		scopeUri: resource,
+		scopeUri: undefined,
 		section: "jsonColorToken"
 	});
 }
@@ -164,7 +127,6 @@ documents.onDidClose(e => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(async (change: TextDocumentChangeEvent<TextDocument>) => {
 	updateColorTokenCache(change.document);
-	await findColorTokens(change.document);
 });
 
 function isColorToken(token: string | number | undefined): boolean {
@@ -212,7 +174,7 @@ let colors: IColors[] = [];
 async function findColorTokens(textDocument: TextDocument): Promise<void> {
 	const text = textDocument.getText();
 	// Get the maxNumberOfColorTokens for every run.
-	const settings = await getDocumentSettings(textDocument.uri);
+	const settings = await getGlobalSettings();
 	const { maxNumberOfColorTokens } = settings;
 
 	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
@@ -342,7 +304,7 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
 	const document = documents.get(params.textDocument.uri);
 	if (!!document && await isLanguageIncludedForColorTokenDetection(document.languageId)) {
-		let settings = await getDocumentSettings(params.textDocument.uri);
+		let settings = await getGlobalSettings();
 		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 	}
 	return [];
