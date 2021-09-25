@@ -170,22 +170,20 @@ async function updateColorTokenCache(textDocument: TextDocument): Promise<void> 
 	}
 }
 
-let colors: IColors[] = [];
-async function findColorTokens(textDocument: TextDocument): Promise<void> {
+async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 	const text = textDocument.getText();
 	// Get the maxNumberOfColorTokens for every run.
 	const settings = await getGlobalSettings();
 	const { maxNumberOfColorTokens } = settings;
 
+	let colors: IColors[] = [];
 	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
 		let regex = new RegExp(colorTokenPattern);
 		let m: RegExpExecArray | null;
-		colors = [];
 		let numTokens = 0;
 
 		while ((m = regex.exec(text)) && numTokens < maxNumberOfColorTokens) {
 			numTokens++;
-
 			colors.push({
 				range: {
 					start: textDocument.positionAt(m.index),
@@ -203,7 +201,6 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 		// Get reference to style variables
 		const regex = new RegExp(cssVariablePattern);
 		let m: RegExpExecArray | null;
-		colors = [];
 		while ((m = regex.exec(text))) {
 			let variableName = m.groups?.cssVar || "";
 			// Show color preview of the first matching color token in color token cache
@@ -219,6 +216,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<void> {
 			}
 		}
 	}
+	return colors;
 }
 
 function parseColor(color: string): Color {
@@ -290,7 +288,7 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 	if (!document) {
 		return [];
 	}
-	await findColorTokens(document);
+	const colors = await findColorTokens(document);
 	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
