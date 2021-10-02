@@ -57,7 +57,7 @@
 						"css",
 						"less"
 					],
-					"description": "Languages for which to search for css variables referencing color tokens. This setting is mutually exclusive with languages set as 'languages'.\n\nThe extension must be restarted for an updated set of languages to take effect."
+					"description": "Languages for which to search for css variables referencing color tokens. This setting is mutually exclusive with languages set as 'languages'.\n\nThe extension must be restarted for an updated set of csslanguages to take effect."
 				}
 			}
 		}
