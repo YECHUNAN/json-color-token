@@ -14,7 +14,6 @@ import {
 } from "vscode-languageclient";
 import {
 	defaultSettings,
-	cssLanguages,
 	maxNumberOfColorTokensNotificationNamespace,
 	maxNumberOfColorTokensNotificationInterval
 } from "./constants";
@@ -50,9 +49,12 @@ export function activate(context: ExtensionContext) {
 	};
 
 	let languages: string[] = defaultSettings.languages;
+	let cssLanguages: string[] = defaultSettings.cssLanguages;
+
 	try {
 		const setting = workspace.getConfiguration("jsonColorToken");
 		languages = setting.get("languages");
+		cssLanguages = setting.get("cssLanguages");
 	} catch (err) {
 		console.warn("Unable to get configurations!");
 	}

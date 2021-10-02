@@ -49,7 +49,15 @@
 						"json",
 						"jsonc"
 					],
-					"description": "Languages to enable the extension features for. The extension must be restarted for an updated set of languages to take effect.\n\nFor languages that already have built-in color token preview support (e.g. css or less), it is not recommended to add them to this setting."
+					"description": "Languages for which to search for color tokens. This setting is mutually exclusive with languages set as 'cssLanguages'. \n\nThe extension must be restarted for an updated set of languages to take effect."
+				},
+				"jsonColorToken.cssLanguages": {
+					"type": "array",
+					"default": [
+						"css",
+						"less"
+					],
+					"description": "Languages for which to search for css variables referencing color tokens. This setting is mutually exclusive with languages set as 'languages'.\n\nThe extension must be restarted for an updated set of languages to take effect."
 				}
 			}
 		}
