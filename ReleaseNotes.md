@@ -31,3 +31,15 @@
 - Known issues:
 
   The language server is only able to parse color tokens in JSON files and preview them in css/less files. This is due to the lack of a standard parser for non-JSON formatted configuration files in NodeJS.
+
+## 1.3.0
+
+- Optimization:
+
+  - Some unnecessary regex executions are removed from the language server. This would result in the language server executing less code.
+
+- New feature:
+
+  - Add a setting to allow previewing cached color tokens as css variables in arbitrary languages. This feature can be useful if a .jsx/.tsx file has CSS variables referencing color tokens in a json config file as JavaScript objects.
+  - If a document reaches the limit of the color tokens defined in the setting. An information notification will be prompt to inform the user of it and suggest bumping the limit.
+  
