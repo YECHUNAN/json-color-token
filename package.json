@@ -8,7 +8,7 @@
 	},
 	"author": "Chunan Ye",
 	"license": "MIT",
-	"version": "1.3.0-dev",
+	"version": "1.3.1",
 	"publisher": "yechunan",
 	"categories": [
 		"Visualization"
@@ -57,7 +57,7 @@
 						"css",
 						"less"
 					],
-					"description": "Languages for which to search for css variables referencing color tokens. This setting is mutually exclusive with languages set as 'languages'.\n\nThe extension must be restarted for an updated set of csslanguages to take effect."
+					"description": "Languages for which to search for css variables referencing color tokens. This setting is mutually exclusive with languages set as 'languages'.\n\nThe extension must be restarted for an updated set of cssLanguages to take effect."
 				}
 			}
 		}
