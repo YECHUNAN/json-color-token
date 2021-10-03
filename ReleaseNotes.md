@@ -40,7 +40,7 @@
 
 - New feature:
 
-  - Add a setting to allow previewing cached color tokens as css variables in arbitrary languages. This feature can be useful if a .jsx/.tsx file has CSS variables referencing color tokens in a json config file as JavaScript objects.
+  - Add a setting to allow previewing cached color tokens as css variables in arbitrary languages. For example, to preview color tokens referenced in a .tsx document, you can add "typescriptreact" to the "CSS Languages" setting. For a complete list of supported language identifiers, please refer to [language identifiers](https://code.visualstudio.com/docs/languages/identifiers).
   - If a document reaches the limit of the color tokens defined in the setting. An information notification will be prompt to inform the user of it and suggest bumping the limit.
   
 ## 1.3.1
