@@ -19,7 +19,7 @@ will be rendered as
 
 If referenced in a css file, the referenced variables will show the color preview
 
-![rendererd-sample-css](https://raw.githubusercontent.com/YECHUNAN/json-color-token/feature/preview-referenced-json-color-tokens-in-css-less/images/readme-sample-css.jpg)
+![rendererd-sample-css](https://raw.githubusercontent.com/YECHUNAN/json-color-token/f0aa8b63417144abf99fcff37edada1e54e8dc96/images/readme-sample-css.jpg)
 
 ## Features
 
@@ -33,7 +33,7 @@ The extension icon is designed using resources from Flaticon.com.
 
 ## Release notes
 
-See features and fixes for each released versions at [release notes](https://github.com/YECHUNAN/json-color-token/blob/feature/preview-referenced-json-color-tokens-in-css-less/ReleaseNotes.md).
+See features and fixes for each released versions at [release notes](https://github.com/YECHUNAN/json-color-token/blob/main/ReleaseNotes.md).
 
 ## License
 
