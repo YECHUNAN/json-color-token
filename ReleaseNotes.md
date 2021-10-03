@@ -43,3 +43,6 @@
   - Add a setting to allow previewing cached color tokens as css variables in arbitrary languages. This feature can be useful if a .jsx/.tsx file has CSS variables referencing color tokens in a json config file as JavaScript objects.
   - If a document reaches the limit of the color tokens defined in the setting. An information notification will be prompt to inform the user of it and suggest bumping the limit.
   
+## 1.3.1
+
+- Fixes links in README.
