@@ -27,7 +27,6 @@ import { IColors } from "./IColors";
 import {
 	JSONColorTokenSettings,
 	defaultSettings,
-	cssLanguages,
 	colorTokenPattern,
 	cssVariablePattern,
 	jsonKeyPattern,
@@ -91,13 +90,26 @@ let globalSettings: JSONColorTokenSettings = defaultSettings;
 // Cache the settings of all open documents
 let documentSettings: Map<string, Thenable<JSONColorTokenSettings>> = new Map();
 let cachedLanguages: string[] | undefined = undefined;
+let cachedCSSLanguages: string[] | undefined = undefined;
 
-async function isLanguageIncludedForColorTokenDetection(languageId: string): Promise<boolean> {
-	if (!cachedLanguages) {
+async function isColorLanguage(languageId: string): Promise<boolean> {
+	if (!cachedLanguages || !cachedCSSLanguages) {
 		const settings = await getRemoteConfiguration() as JSONColorTokenSettings;
 		cachedLanguages = settings.languages;
+		cachedCSSLanguages = settings.cssLanguages;
 	}
-	return cssLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
+
+	// Although it is up to the user to separate css languages and languages that include color tokens.
+	// We treat colliding languages as css languates to avoid chaos.
+	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
+}
+
+async function isCSSLanguage(languageId: string): Promise<boolean> {
+	if (!cachedCSSLanguages) {
+		const settings = await getRemoteConfiguration() as JSONColorTokenSettings;
+		cachedCSSLanguages = settings.cssLanguages;
+	}
+	return cachedCSSLanguages.indexOf(languageId) >= 0;
 }
 
 function getGlobalSettings(): Thenable<JSONColorTokenSettings> {
@@ -138,7 +150,7 @@ function isColorToken(token: string | number | undefined): boolean {
 }
 
 async function updateColorTokenCache(textDocument: TextDocument): Promise<void> {
-	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
+	if (await isColorLanguage(textDocument.languageId)) {
 		let text = textDocument.getText();
 		try {
 			let jsonObj = JSON.parse(text);
@@ -177,7 +189,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 	const { maxNumberOfColorTokens } = settings;
 
 	let colors: IColors[] = [];
-	if (await isLanguageIncludedForColorTokenDetection(textDocument.languageId)) {
+	if (await isColorLanguage(textDocument.languageId)) {
 		let regex = new RegExp(colorTokenPattern);
 		let m: RegExpExecArray | null;
 		let numTokens = 0;
@@ -197,7 +209,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 		if (numTokens === maxNumberOfColorTokens) {
 			connection.sendNotification(maxNumberOfColorTokensNotificationNamespace, { count: maxNumberOfColorTokens });
 		}
-	} else if (cssLanguages.indexOf(textDocument.languageId) >= 0) {
+	} else if (await isCSSLanguage(textDocument.languageId)) {
 		// Get reference to style variables
 		const regex = new RegExp(cssVariablePattern);
 		let m: RegExpExecArray | null;
@@ -255,14 +267,14 @@ function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string
 
 // For color token variables referenced in css/less files,
 // go to definition will bring to the json file where the token is defined.
-connection.onDefinition((params: DefinitionParams): Definition | undefined => {
+connection.onDefinition(async (params: DefinitionParams): Promise<Definition | undefined> => {
 	const { textDocument, position } = params;
 	const textDocumentObj = documents.get(textDocument.uri);
 	if (!textDocumentObj) {
 		return;
 	}
 	const languageID = textDocumentObj.languageId;
-	if (cssLanguages.indexOf(languageID) >= 0) {
+	if (await isCSSLanguage(languageID)) {
 		// Get the line of the text and try to parse out the first referenced css variable, if any
 		const regex = new RegExp(cssVariablePattern);
 		const lineText = textDocumentObj.getText({
@@ -301,7 +313,7 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
 	const document = documents.get(params.textDocument.uri);
-	if (!!document && await isLanguageIncludedForColorTokenDetection(document.languageId)) {
+	if (!!document && await isColorLanguage(document.languageId)) {
 		let settings = await getGlobalSettings();
 		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 	}

@@ -13,28 +13,30 @@ export interface JSONColorTokenSettings {
 	 * Used mainly to avoid performance issues.
 	 */
 	maxNumberOfColorTokens: number;
+
 	/**
 	 * When using the color picker to set color, whether to set them as uppercase or lowercase letters.
 	 */
 	colorTokenCasing: "Uppercase" | "Lowercase";
+
 	/**
-	 * For what language of documents to apply the extension.
+	 * Languages for which to search for color tokens. Mutually exclusive with `cssLanguages`.
 	 */
 	languages: string[];
+
+	/**
+	 * Languages for which to search for referenced color token variables. Mutually exclusive with `languages`.
+	 */
+	cssLanguages: string[];
 }
 
 // The default settings, used when the `workspace/configuration` request is not supported by the client.
 export const defaultSettings: JSONColorTokenSettings = {
 	maxNumberOfColorTokens: 1000,
 	colorTokenCasing: "Uppercase",
-	languages: ["json", "jsonc"]
+	languages: ["json", "jsonc"],
+	cssLanguages: ["css", "less"]
 };
-
-/**
- * Css languages to exclude for color token detection and preview.
- * Detected color tokens that are referenced in css documents will also present a color preview.
- */
-export const cssLanguages: string[] = ["css", "less"];
 
 export const maxNumberOfColorTokensNotificationNamespace = "JSONCOLORTOKEN.maxNumberOfColorTokens";
 /**
