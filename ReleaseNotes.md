@@ -1,21 +1,19 @@
 # Release Notes
 
-## 1.0.0
+## 1.3.1
 
-- Support previewing hex color tokens which contains only RGB values in json files.
-- Support editing hex color token's RGB value using the built-in color editor in json files.
+- Fixes links in README.
 
-## 1.0.1
+## 1.3.0
 
-- Add icon for extension.
+- Optimization:
 
-## 1.1.0
+  - Some unnecessary regex executions are removed from the language server. This would result in the language server executing less code.
 
 - New feature:
-  - The extension will now cache color tokens in opened json files and show color preview in css/less files when the variable names match. Note: if multiple opened json files provide the same color token, the language server will only preview that color token in one of these opened json files. 
-- Change the default number of maximum color token for preview from 100 to be 1000.
-- Hex color token preview now support alpha values.
-- Hex color token editor can now edit the alpha value using the built-in color editor.
+
+  - Add a setting to allow previewing cached color tokens as css variables in arbitrary languages. For example, to preview color tokens referenced in a .tsx document, you can add "typescriptreact" to the "CSS Languages" setting. For a complete list of supported language identifiers, please refer to [language identifiers](https://code.visualstudio.com/docs/languages/identifiers).
+  - If a document reaches the limit of the color tokens defined in the setting. An information notification will be prompt to inform the user of it and suggest bumping the limit.
 
 ## 1.2.0
 
@@ -32,17 +30,19 @@
 
   The language server is only able to parse color tokens in JSON files and preview them in css/less files. This is due to the lack of a standard parser for non-JSON formatted configuration files in NodeJS.
 
-## 1.3.0
-
-- Optimization:
-
-  - Some unnecessary regex executions are removed from the language server. This would result in the language server executing less code.
+## 1.1.0
 
 - New feature:
+  - The extension will now cache color tokens in opened json files and show color preview in css/less files when the variable names match. Note: if multiple opened json files provide the same color token, the language server will only preview that color token in one of these opened json files. 
+- Change the default number of maximum color token for preview from 100 to be 1000.
+- Hex color token preview now support alpha values.
+- Hex color token editor can now edit the alpha value using the built-in color editor.
 
-  - Add a setting to allow previewing cached color tokens as css variables in arbitrary languages. For example, to preview color tokens referenced in a .tsx document, you can add "typescriptreact" to the "CSS Languages" setting. For a complete list of supported language identifiers, please refer to [language identifiers](https://code.visualstudio.com/docs/languages/identifiers).
-  - If a document reaches the limit of the color tokens defined in the setting. An information notification will be prompt to inform the user of it and suggest bumping the limit.
-  
-## 1.3.1
+## 1.0.1
 
-- Fixes links in README.
+- Add icon for extension.
+
+## 1.0.0
+
+- Support previewing hex color tokens which contains only RGB values in json files.
+- Support editing hex color token's RGB value using the built-in color editor in json files.
