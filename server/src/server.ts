@@ -173,7 +173,6 @@ async function updateColorTokenCache(
 				const variableName =
 					m.groups?.varDoulbeQuote ?? m.groups?.varSingleQuote;
 				if (!!variableName && isColorToken(jsonObj[variableName])) {
-					// console.log(jsonObj[variableName])
 					colorTokenObj[variableName] = {
 						color: jsonObj[variableName],
 						range: {
@@ -299,18 +298,21 @@ function stringifyColor(
 		let result = Math.floor(val * 255).toString(16);
 		return result.length === 1 ? "0" + result : result;
 	}
-	if (casing === "Lowercase") {
-		result += valueToCode(color.red).toLowerCase();
-		result += valueToCode(color.green).toLowerCase();
-		result += valueToCode(color.blue).toLowerCase();
-	} else {
-		result += valueToCode(color.red).toUpperCase();
-		result += valueToCode(color.green).toUpperCase();
-		result += valueToCode(color.blue).toUpperCase();
-	}
+
+	result += valueToCode(color.red);
+	result += valueToCode(color.green);
+	result += valueToCode(color.blue);
+
 	if (color.alpha < 1.0) {
-		result += (color.alpha * 100).toFixed(0);
+		result += valueToCode(color.alpha);
 	}
+
+	if (casing === "Lowercase") {
+		result = result.toLowerCase();
+	} else {
+		result = result.toUpperCase();
+	}
+
 	return result;
 }
 
