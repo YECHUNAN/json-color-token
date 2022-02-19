@@ -42,7 +42,7 @@ export const defaultSettings: JSONColorTokenSettings = {
 /* A color token can be with/without opacity (last two digits)
  * e.g. without opacity #000000, with opacity #00000050
  *
- * The opacity code is a two digit hex value reprensenting the fraction out of 256.
+ * The opacity code is a two digit hex value representing the fraction out of 256.
  * e.g. 0x80 means 1/2 opacity because 0x80 / 256 = 0.5
  */
 export const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?/g;
