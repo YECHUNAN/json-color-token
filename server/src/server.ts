@@ -237,10 +237,10 @@ function parseColor(color: string): Color {
 	const blue = parseInt(color.slice(5, 7), 16) / 255;
 	let alpha = 1.0;
 	if (color.length === 9) {
-		alpha = parseInt(color.slice(7, 9), 10) / 100;
+		alpha = parseInt(color.slice(7, 9), 16) / 256;
 	}
 	return {
-		red, green, blue, alpha: alpha
+		red, green, blue, alpha
 	}
 }
 
