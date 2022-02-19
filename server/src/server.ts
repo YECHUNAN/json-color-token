@@ -165,6 +165,7 @@ async function updateColorTokenCache(textDocument: TextDocument): Promise<void> 
 			while ((m = regex.exec(text))) {
 				const variableName = m.groups?.varDoulbeQuote ?? m.groups?.varSingleQuote;
 				if (!!variableName && isColorToken(jsonObj[variableName])) {
+					// console.log(jsonObj[variableName])
 					colorTokenObj[variableName] = {
 						color: jsonObj[variableName],
 						range: {
@@ -196,13 +197,22 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 
 		while ((m = regex.exec(text)) && numTokens < maxNumberOfColorTokens) {
 			numTokens++;
+			let color = m[0]
+			let lastChar = color.charAt(color.length - 1)
+	
+
+			if ([' ', ';', ',', '"'].includes(lastChar)) {
+				color = color.slice(0, -1)
+			}
+			
 			colors.push({
 				range: {
 					start: textDocument.positionAt(m.index),
-					end: textDocument.positionAt(m.index + m[0].length)
+					end: textDocument.positionAt(m.index + color.length)
 				},
-				color: m[0]
+				color: color
 			});
+			
 		}
 		// If max number of color token is reached, show an info notification 
 		// and don't show this notification until a predefined amout of time has passed.
@@ -231,18 +241,35 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 	return colors;
 }
 
+function parsehex3(color: string): string {
+	color = color.slice(1)
+	return '#' + color.split('').map(function (hex) {
+		return hex + hex;
+	}).join('');
+}
+
 function parseColor(color: string): Color {
+
+
+	if (color.length < 6) {
+		color = parsehex3(color)
+	}
+
 	const red = parseInt(color.slice(1, 3), 16) / 255;
 	const green = parseInt(color.slice(3, 5), 16) / 255;
 	const blue = parseInt(color.slice(5, 7), 16) / 255;
+
 	let alpha = 1.0;
+
 	if (color.length === 9) {
-		alpha = parseInt(color.slice(7, 9), 10) / 100;
+		alpha = parseInt(color.slice(7, 9), 16) / 255;
 	}
+	
 	return {
 		red, green, blue, alpha: alpha
 	}
 }
+
 
 function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string {
 	let result = "#";
