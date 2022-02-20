@@ -197,11 +197,6 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 		while ((m = regex.exec(text)) && numTokens < maxNumberOfColorTokens) {
 			numTokens++;
 			let color = m[0];
-			let lastChar = color.charAt(color.length - 1);
-
-			if ([" ", ";", ",", '"'].includes(lastChar)) {
-				color = color.slice(0, -1);
-			}
 
 			colors.push({
 				range: {
