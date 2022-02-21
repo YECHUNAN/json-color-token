@@ -100,7 +100,7 @@ async function isColorLanguage(languageId: string): Promise<boolean> {
 	}
 
 	// Although it is up to the user to separate css languages and languages that include color tokens.
-	// We treat colliding languages as css languates to avoid chaos.
+	// We treat colliding languages as css languages to avoid chaos.
 	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
 
@@ -233,14 +233,21 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 	return colors;
 }
 
-function parsehex3(color: string): string {
+/**
+ * Convert a short hex code to its equivalent full hex code.
+ * 
+ * @example 
+ * convertShortHexCodeToFullHexCode("#f00") // returns "#ff0000"
+ * convertShortHexCodeToFullHexCode("#f00a") // returns "#ff0000aa"
+ */
+function convertShortHexCodeToFullHexCode(color: string): string {
 	color = color.slice(1);
 	return "#" + color.split("").map(hex => hex + hex).join("");
 }
 
 function parseColor(color: string): Color {
 	if (color.length < 6) {
-		color = parsehex3(color);
+		color = convertShortHexCodeToFullHexCode(color);
 	}
 
 	const red = parseInt(color.slice(1, 3), 16) / 255;
@@ -316,14 +323,14 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 		return [];
 	}
 	const colors = await findColorTokens(document);
-	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
+	const colorInformationArray: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
 			range: colorObj.range,
 			color: color
 		};
 	});
-	return colorInformations;
+	return colorInformationArray;
 });
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {

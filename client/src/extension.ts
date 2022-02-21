@@ -24,7 +24,7 @@ let client: LanguageClient;
  * @param count Limit of the number of color tokens to be parsed.
  * @todo Loc
  */
-function getmaxNumberOfColorTokensNotificationMessage(count: number): string {
+function getMaxNumberOfColorTokensNotificationMessage(count: number): string {
 	return `The number of color tokens detected has reached the limit: ${count}. Please consider increasing the limit in the configuration.`;
 }
 
@@ -87,7 +87,7 @@ export function activate(context: ExtensionContext) {
 		client.onNotification(maxNumberOfColorTokensNotificationNamespace, (args: { count: number }) => {
 			const currentTimeInSec = Date.now();
 			if (!lastNotificationTimeInSec || (currentTimeInSec - lastNotificationTimeInSec) > maxNumberOfColorTokensNotificationInterval) {
-				VSCodeWindow.showInformationMessage(getmaxNumberOfColorTokensNotificationMessage(args.count));
+				VSCodeWindow.showInformationMessage(getMaxNumberOfColorTokensNotificationMessage(args.count));
 				lastNotificationTimeInSec = currentTimeInSec;
 			}
 		});
