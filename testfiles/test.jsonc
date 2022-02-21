@@ -2,5 +2,7 @@
 {
 	"colorA": "#88FF00",
 	"colorB": "#FFFFFF",
-	"colorC": "#0004FF"
+	"colorC": "#0004FF",
+	"shortHexCode": "#f00", // equivalent to #ff0000
+	"shortHexCodeWithOpacity": "#f008" // equivalent to #ff000088
 }
