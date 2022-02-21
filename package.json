@@ -68,7 +68,8 @@
 		"watch": "tsc -b -w",
 		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
 		"package": "vsce package",
-		"publish": "vsce publish"
+		"publish": "vsce publish",
+		"lint": "eslint . --ext .ts"
 	},
 	"devDependencies": {
 		"@types/node": "^12.12.0",

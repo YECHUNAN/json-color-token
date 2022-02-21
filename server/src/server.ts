@@ -20,8 +20,8 @@ import {
 	Definition,
 	Range
 } from "vscode-languageserver";
-import { 
-	TextDocument 
+import {
+	TextDocument
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
 import {
@@ -101,7 +101,7 @@ async function isColorLanguage(languageId: string): Promise<boolean> {
 
 	// Although it is up to the user to separate css languages and languages that include color tokens.
 	// We treat colliding languages as css languates to avoid chaos.
-	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0
+	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
 
 async function isCSSLanguage(languageId: string): Promise<boolean> {
@@ -171,7 +171,7 @@ async function updateColorTokenCache(textDocument: TextDocument): Promise<void> 
 							start: textDocument.positionAt(m.index),
 							end: textDocument.positionAt(m.index + variableName.length)
 						}
-					}
+					};
 				}
 			}
 
@@ -235,7 +235,7 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 
 function parsehex3(color: string): string {
 	color = color.slice(1);
-	return  "#" + color.split("").map(hex => hex + hex).join("")
+	return "#" + color.split("").map(hex => hex + hex).join("");
 }
 
 function parseColor(color: string): Color {
@@ -330,7 +330,7 @@ connection.onColorPresentation(async (params: ColorPresentationParams): Promise<
 	const document = documents.get(params.textDocument.uri);
 	if (!!document && (await isColorLanguage(document.languageId))) {
 		let settings = await getGlobalSettings();
-		return [{ label: stringifyColor( params.color, settings.colorTokenCasing) }];
+		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 	}
 	return [];
 });
