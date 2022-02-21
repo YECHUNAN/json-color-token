@@ -20,8 +20,8 @@ import {
 	Definition,
 	Range
 } from "vscode-languageserver";
-import {
-	TextDocument
+import { 
+	TextDocument 
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
 import {
@@ -37,7 +37,7 @@ import {
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
 
-// Create a simple text document manager. 
+// Create a simple text document manager.
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let colorTokenCache: {
 	[documentUri: string]: {
@@ -101,7 +101,7 @@ async function isColorLanguage(languageId: string): Promise<boolean> {
 
 	// Although it is up to the user to separate css languages and languages that include color tokens.
 	// We treat colliding languages as css languates to avoid chaos.
-	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
+	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0
 }
 
 async function isCSSLanguage(languageId: string): Promise<boolean> {
@@ -196,15 +196,17 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 
 		while ((m = regex.exec(text)) && numTokens < maxNumberOfColorTokens) {
 			numTokens++;
+			let color = m[0];
+
 			colors.push({
 				range: {
 					start: textDocument.positionAt(m.index),
-					end: textDocument.positionAt(m.index + m[0].length)
+					end: textDocument.positionAt(m.index + color.length)
 				},
-				color: m[0]
+				color: color
 			});
 		}
-		// If max number of color token is reached, show an info notification 
+		// If max number of color token is reached, show an info notification
 		// and don't show this notification until a predefined amout of time has passed.
 		if (numTokens === maxNumberOfColorTokens) {
 			connection.sendNotification(maxNumberOfColorTokensNotificationNamespace, { count: maxNumberOfColorTokens });
@@ -231,17 +233,27 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 	return colors;
 }
 
+function parsehex3(color: string): string {
+	color = color.slice(1);
+	return  "#" + color.split("").map(hex => hex + hex).join("")
+}
+
 function parseColor(color: string): Color {
+	if (color.length < 6) {
+		color = parsehex3(color);
+	}
+
 	const red = parseInt(color.slice(1, 3), 16) / 255;
 	const green = parseInt(color.slice(3, 5), 16) / 255;
 	const blue = parseInt(color.slice(5, 7), 16) / 255;
+
 	let alpha = 1.0;
+
 	if (color.length === 9) {
-		alpha = parseInt(color.slice(7, 9), 10) / 100;
+		alpha = parseInt(color.slice(7, 9), 16) / 255;
 	}
-	return {
-		red, green, blue, alpha: alpha
-	}
+
+	return { red, green, blue, alpha: alpha };
 }
 
 function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string {
@@ -250,18 +262,21 @@ function stringifyColor(color: Color, casing: "Uppercase" | "Lowercase"): string
 		let result = Math.floor(val * 255).toString(16);
 		return result.length === 1 ? "0" + result : result;
 	}
-	if (casing === "Lowercase") {
-		result += valueToCode(color.red).toLowerCase();
-		result += valueToCode(color.green).toLowerCase();
-		result += valueToCode(color.blue).toLowerCase();
-	} else {
-		result += valueToCode(color.red).toUpperCase();
-		result += valueToCode(color.green).toUpperCase();
-		result += valueToCode(color.blue).toUpperCase();
-	}
+
+	result += valueToCode(color.red);
+	result += valueToCode(color.green);
+	result += valueToCode(color.blue);
+
 	if (color.alpha < 1.0) {
-		result += (color.alpha * 100).toFixed(0);
+		result += valueToCode(color.alpha);
 	}
+
+	if (casing === "Lowercase") {
+		result = result.toLowerCase();
+	} else {
+		result = result.toUpperCase();
+	}
+
 	return result;
 }
 
@@ -313,9 +328,9 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
 	const document = documents.get(params.textDocument.uri);
-	if (!!document && await isColorLanguage(document.languageId)) {
+	if (!!document && (await isColorLanguage(document.languageId))) {
 		let settings = await getGlobalSettings();
-		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
+		return [{ label: stringifyColor( params.color, settings.colorTokenCasing) }];
 	}
 	return [];
 });

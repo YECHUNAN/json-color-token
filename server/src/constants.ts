@@ -42,7 +42,8 @@ export const defaultSettings: JSONColorTokenSettings = {
 /* A color token can be with/without opacity (last two digits)
  * e.g. without opacity #000000, with opacity #00000050
  */
-export const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;
+export const colorTokenPattern = /#([0-9a-fA-F]{6}([0-9a-fA-F]{2})?|[0-9a-fA-F]{3}([0-9a-fA-F]{1})?)/g;
+// export const colorTokenPattern = /#[0-9a-fA-F]{6}([0-9]{2})?/g;
 
 export const cssVariablePattern = /var\(--(?<cssVar>[a-zA-Z0-9\-]+)\)/g;
 
