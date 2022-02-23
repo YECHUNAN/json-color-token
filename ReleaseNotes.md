@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.3.2
+
+- Fixes parsing opacity values incorrectly.
+- Add support to previewing colors written in short hex code.
+
 ## 1.3.1
 
 - Fixes links in README.
