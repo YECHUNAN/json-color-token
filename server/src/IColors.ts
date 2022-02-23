@@ -11,4 +11,4 @@ export interface IColors {
 		start: Position,
 		end: Position
 	}
-};
+}

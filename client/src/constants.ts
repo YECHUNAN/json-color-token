@@ -40,7 +40,7 @@ export const defaultSettings: JSONColorTokenSettings = {
 
 export const maxNumberOfColorTokensNotificationNamespace = "JSONCOLORTOKEN.maxNumberOfColorTokens";
 /**
- * Minimum amount of time in seconds between two maxNumberOfColorTokensNoftification.
+ * Minimum amount of time in seconds between two {@link maxNumberOfColorTokensNotificationInterval}.
  * The likelihood of exceeding the number of tokens is expected to be low.
  * Make sure this number is large enough to not annoy user.
  * @todo: See if this needs to be configurable.

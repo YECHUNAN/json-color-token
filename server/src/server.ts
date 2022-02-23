@@ -20,8 +20,8 @@ import {
 	Definition,
 	Range
 } from "vscode-languageserver";
-import { 
-	TextDocument 
+import {
+	TextDocument
 } from "vscode-languageserver-textdocument";
 import { IColors } from "./IColors";
 import {
@@ -100,8 +100,8 @@ async function isColorLanguage(languageId: string): Promise<boolean> {
 	}
 
 	// Although it is up to the user to separate css languages and languages that include color tokens.
-	// We treat colliding languages as css languates to avoid chaos.
-	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0
+	// We treat colliding languages as css languages to avoid chaos.
+	return cachedCSSLanguages.indexOf(languageId) < 0 && cachedLanguages.indexOf(languageId) >= 0;
 }
 
 async function isCSSLanguage(languageId: string): Promise<boolean> {
@@ -171,7 +171,7 @@ async function updateColorTokenCache(textDocument: TextDocument): Promise<void> 
 							start: textDocument.positionAt(m.index),
 							end: textDocument.positionAt(m.index + variableName.length)
 						}
-					}
+					};
 				}
 			}
 
@@ -233,14 +233,21 @@ async function findColorTokens(textDocument: TextDocument): Promise<IColors[]> {
 	return colors;
 }
 
-function parsehex3(color: string): string {
+/**
+ * Convert a short hex code to its equivalent full hex code.
+ * 
+ * @example 
+ * convertShortHexCodeToFullHexCode("#f00") // returns "#ff0000"
+ * convertShortHexCodeToFullHexCode("#f00a") // returns "#ff0000aa"
+ */
+function convertShortHexCodeToFullHexCode(color: string): string {
 	color = color.slice(1);
-	return  "#" + color.split("").map(hex => hex + hex).join("")
+	return "#" + color.split("").map(hex => hex + hex).join("");
 }
 
 function parseColor(color: string): Color {
 	if (color.length < 6) {
-		color = parsehex3(color);
+		color = convertShortHexCodeToFullHexCode(color);
 	}
 
 	const red = parseInt(color.slice(1, 3), 16) / 255;
@@ -316,21 +323,21 @@ connection.onDocumentColor(async (params: DocumentColorParams): Promise<ColorInf
 		return [];
 	}
 	const colors = await findColorTokens(document);
-	const colorInformations: ColorInformation[] = colors.map((colorObj) => {
+	const colorInformationArray: ColorInformation[] = colors.map((colorObj) => {
 		const color = parseColor(colorObj.color);
 		return {
 			range: colorObj.range,
 			color: color
 		};
 	});
-	return colorInformations;
+	return colorInformationArray;
 });
 
 connection.onColorPresentation(async (params: ColorPresentationParams): Promise<ColorPresentation[]> => {
 	const document = documents.get(params.textDocument.uri);
 	if (!!document && (await isColorLanguage(document.languageId))) {
 		let settings = await getGlobalSettings();
-		return [{ label: stringifyColor( params.color, settings.colorTokenCasing) }];
+		return [{ label: stringifyColor(params.color, settings.colorTokenCasing) }];
 	}
 	return [];
 });
