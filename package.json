@@ -14,7 +14,7 @@
 		"Visualization"
 	],
 	"engines": {
-		"vscode": "^1.43.0"
+		"vscode": "^1.81.0"
 	},
 	"activationEvents": [
 		"onLanguage:plaintext"
