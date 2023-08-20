@@ -10,13 +10,13 @@
 		"url": "https://github.com/YECHUNAN/json-color-token"
 	},
 	"engines": {
-		"vscode": "^1.43.0"
+		"vscode": "^1.81.0"
 	},
 	"dependencies": {
 		"vscode-languageclient": "^6.1.3"
 	},
 	"devDependencies": {
-		"@types/vscode": "1.43.0",
-		"vscode-test": "^1.3.0"
+		"@types/vscode": "1.81.0",
+		"vscode-test": "^1.6.0"
 	}
 }
